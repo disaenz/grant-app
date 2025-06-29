@@ -76,3 +76,7 @@
   color: #000 !important; /* Adjust text color if needed */
 }
 
+.react-datepicker-wrapper {
+  width: 100%;
+}
+

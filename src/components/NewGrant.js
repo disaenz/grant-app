@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Modal, Row, Col, Form } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from 'date-fns';
 
 function NewGrant({ onAddAward }) {
   const [showModal, setShowModal] = useState(false);
@@ -9,11 +12,10 @@ function NewGrant({ onAddAward }) {
     program: '',
     type: '',
     status: '',
-    startDate: '',
-    deadline: '',
+    startDate: null,
+    deadline: null,
     budgetRange: '',
     notes: '',
-    // createdAt and updatedAt can be omitted unless needed in the form.
   });
 
   const handleShow = () => setShowModal(true);
@@ -25,8 +27,8 @@ function NewGrant({ onAddAward }) {
       program: '',
       type: '',
       status: '',
-      startDate: '',
-      deadline: '',
+      startDate: null,
+      deadline: null,
       budgetRange: '',
       notes: '',
     });
@@ -36,9 +38,25 @@ function NewGrant({ onAddAward }) {
     setNewAward({ ...newAward, [field]: e.target.value });
   };
 
+  const handleDateChange = (field) => (date) => {
+    setNewAward({ ...newAward, [field]: date });
+  };
+
+  // Converts a Date object to MM/DD/YYYY string
+  const formatDate = (date) => {
+    if (!date) return '';
+    return format(date, 'MM/dd/yyyy');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAddAward(newAward);
+    // Convert Date objects to MM/DD/YYYY before saving
+    const payload = {
+      ...newAward,
+      startDate: formatDate(newAward.startDate),
+      deadline: formatDate(newAward.deadline),
+    };
+    onAddAward(payload);
     handleClose();
   };
 
@@ -102,22 +120,26 @@ function NewGrant({ onAddAward }) {
             <Row className="mb-3">
               <Col md={3} className="fw-bold">Start Date</Col>
               <Col md={9}>
-                <Form.Control
-                  type="text"
-                  placeholder="MM/DD/YYYY"
-                  value={newAward.startDate}
-                  onChange={handleChange('startDate')}
+                <DatePicker
+                  selected={newAward.startDate}
+                  onChange={handleDateChange('startDate')}
+                  dateFormat="MM/dd/yyyy"
+                  className="form-control"
+                  placeholderText="Select date"
+                  required
                 />
               </Col>
             </Row>
             <Row className="mb-3">
               <Col md={3} className="fw-bold">Deadline</Col>
               <Col md={9}>
-                <Form.Control
-                  type="text"
-                  placeholder="MM/DD/YYYY"
-                  value={newAward.deadline}
-                  onChange={handleChange('deadline')}
+                <DatePicker
+                  selected={newAward.deadline}
+                  onChange={handleDateChange('deadline')}
+                  dateFormat="MM/dd/yyyy"
+                  className="form-control"
+                  placeholderText="Select date"
+                  required
                 />
               </Col>
             </Row>
