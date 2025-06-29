@@ -23,7 +23,7 @@ function DataRow({ rowData }) {
   };
 
   const handleSaveClick = () => {
-    console.log('Saving data:', tempData);
+    // TODO: Add save logic here (API call if needed)
     setIsEditing(false);
     setShouldShowAlert(true);
     setShowModal(false);
@@ -34,8 +34,8 @@ function DataRow({ rowData }) {
     setIsEditing(false);
   };
 
-  const renderTextField = (fieldName) => {
-    return isEditing ? (
+  const renderTextField = (fieldName) =>
+    isEditing ? (
       <Form.Control
         type="text"
         value={tempData[fieldName] || ''}
@@ -46,157 +46,89 @@ function DataRow({ rowData }) {
     ) : (
       <span>{rowData[fieldName]}</span>
     );
-  };
 
-  const renderNotesField = () => {
-    return isEditing ? (
+  const renderNotesField = () =>
+    isEditing ? (
       <Form.Control
         as="textarea"
         rows={3}
         style={{ resize: 'none' }}
         value={tempData.notes || ''}
-        onChange={(e) => setTempData({ ...tempData, notes: e.target.value })}
+        onChange={(e) =>
+          setTempData({ ...tempData, notes: e.target.value })
+        }
       />
     ) : (
-      <span>{rowData.notes}</span>
+      <span>
+        {rowData.notes && rowData.notes.length > 50
+          ? rowData.notes.slice(0, 50) + '...'
+          : rowData.notes}
+      </span>
     );
-  };
 
   return (
     <>
       <tr className="clickable-row" onClick={handleShow}>
-        <td className="blue-column">{rowData.grantMakingProcess}</td>
+        <td>{rowData.name}</td>
         <td>{rowData.program}</td>
-        <td>{rowData.competitive}</td>
-        <td>{rowData.typesOfApplication}</td>
-        <td>{rowData.internalOrExternalReview}</td>
-        <td>{rowData.eGrantsOrNewSystem}</td>
-        <td>{rowData.expectedApplicants}</td>
-        <td>{rowData.deadlineForKickOff}</td>
-        <td>{rowData.systemPrepDate}</td>
-        <td>{rowData.outreachStartDate}</td>
-        <td>{rowData.recommendationPlanDate}</td>
-        <td>{rowData.publishDevelopment}</td>
-        <td>{rowData.applicationDueDate}</td>
-        <td>{rowData.reviewPeriod}</td>
-        <td>{rowData.applicantClarification}</td>
-        <td>{rowData.oroClarification}</td>
-        <td>{rowData.programPrepForDecision}</td>
-        <td>{rowData.awardDecision}</td>
-        <td>{rowData.applicantNotification}</td>
-        <td>{rowData.finishTerms}</td>
-        <td>{rowData.oroAwardProcessing}</td>
-        <td>{rowData.budgetOfficeFundCommitment}</td>
-        <td>{rowData.ogaAwardProcessing}</td>
-        <td>{rowData.awardTarget}</td>
+        <td>{rowData.type}</td>
+        <td>{rowData.status}</td>
+        <td>{rowData.startDate}</td>
+        <td>{rowData.deadline}</td>
+        <td>{rowData.budgetRange}</td>
         <td className="notes-col">
-            {rowData.notes && rowData.notes.length > 50
-                ? rowData.notes.slice(0, 50) + "..."
-                : rowData.notes
-            }
+          {rowData.notes && rowData.notes.length > 50
+            ? rowData.notes.slice(0, 50) + "..."
+            : rowData.notes}
         </td>
       </tr>
 
-      <Modal show={showModal} 
-        onHide={() => setShowModal(false)} 
+      <Modal
+        show={showModal}
+        onHide={handleClose}
         onExited={() => {
           if (shouldShowAlert) {
             alert('Record was successfully updated!');
             setShouldShowAlert(false);
           }
         }}
-        size="xl">
+        size="lg"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>{rowData.grantMakingProcess} Details</Modal.Title>
+          <Modal.Title>{rowData.name} Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">Grant Making Process</Col>
-            <Col md={3}>{renderTextField('grantMakingProcess')}</Col>
-            <Col md={3} className="fw-bold">Program</Col>
-            <Col md={3}>{renderTextField('program')}</Col>
+            <Col md={4} className="fw-bold">Name</Col>
+            <Col md={8}>{renderTextField('name')}</Col>
           </Row>
-
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">Competitive</Col>
-            <Col md={3}>{renderTextField('competitive')}</Col>
-            <Col md={3} className="fw-bold">Types of Application</Col>
-            <Col md={3}>{renderTextField('typesOfApplication')}</Col>
+            <Col md={4} className="fw-bold">Program</Col>
+            <Col md={8}>{renderTextField('program')}</Col>
           </Row>
-
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">Internal or External Review</Col>
-            <Col md={3}>{renderTextField('internalOrExternalReview')}</Col>
-            <Col md={3} className="fw-bold">eGrants or New System</Col>
-            <Col md={3}>{renderTextField('eGrantsOrNewSystem')}</Col>
+            <Col md={4} className="fw-bold">Type</Col>
+            <Col md={8}>{renderTextField('type')}</Col>
           </Row>
-
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">Expected Applicants</Col>
-            <Col md={3}>{renderTextField('expectedApplicants')}</Col>
-            <Col md={3} className="fw-bold">Deadline for Kick-Off</Col>
-            <Col md={3}>{renderTextField('deadlineForKickOff')}</Col>
+            <Col md={4} className="fw-bold">Status</Col>
+            <Col md={8}>{renderTextField('status')}</Col>
           </Row>
-
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">System Prep Date</Col>
-            <Col md={3}>{renderTextField('systemPrepDate')}</Col>
-            <Col md={3} className="fw-bold">Outreach Start Date</Col>
-            <Col md={3}>{renderTextField('outreachStartDate')}</Col>
+            <Col md={4} className="fw-bold">Start Date</Col>
+            <Col md={8}>{renderTextField('startDate')}</Col>
           </Row>
-
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">Recommendation Plan Date</Col>
-            <Col md={3}>{renderTextField('recommendationPlanDate')}</Col>
-            <Col md={3} className="fw-bold">Publish Development</Col>
-            <Col md={3}>{renderTextField('publishDevelopment')}</Col>
+            <Col md={4} className="fw-bold">Deadline</Col>
+            <Col md={8}>{renderTextField('deadline')}</Col>
           </Row>
-
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">Application Due Date</Col>
-            <Col md={3}>{renderTextField('applicationDueDate')}</Col>
-            <Col md={3} className="fw-bold">Review Period</Col>
-            <Col md={3}>{renderTextField('reviewPeriod')}</Col>
+            <Col md={4} className="fw-bold">Budget Range</Col>
+            <Col md={8}>{renderTextField('budgetRange')}</Col>
           </Row>
-
           <Row className="mb-3">
-            <Col md={3} className="fw-bold">Applicant Clarification</Col>
-            <Col md={3}>{renderTextField('applicantClarification')}</Col>
-            <Col md={3} className="fw-bold">ORO Clarification</Col>
-            <Col md={3}>{renderTextField('oroClarification')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Program Prep for Decision</Col>
-            <Col md={3}>{renderTextField('programPrepForDecision')}</Col>
-            <Col md={3} className="fw-bold">Award Decision</Col>
-            <Col md={3}>{renderTextField('awardDecision')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Applicant Notification</Col>
-            <Col md={3}>{renderTextField('applicantNotification')}</Col>
-            <Col md={3} className="fw-bold">Finish Terms</Col>
-            <Col md={3}>{renderTextField('finishTerms')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">ORO Award Processing</Col>
-            <Col md={3}>{renderTextField('oroAwardProcessing')}</Col>
-            <Col md={3} className="fw-bold">Budget Office Fund Commitment</Col>
-            <Col md={3}>{renderTextField('budgetOfficeFundCommitment')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">OGA Award Processing</Col>
-            <Col md={3}>{renderTextField('ogaAwardProcessing')}</Col>
-            <Col md={3} className="fw-bold">Award Target</Col>
-            <Col md={3}>{renderTextField('awardTarget')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Notes</Col>
-            <Col md={9}>{renderNotesField()}</Col>
+            <Col md={4} className="fw-bold">Notes</Col>
+            <Col md={8}>{renderNotesField()}</Col>
           </Row>
         </Modal.Body>
         <Modal.Footer>
@@ -211,12 +143,12 @@ function DataRow({ rowData }) {
             </>
           ) : (
             <>
-                <Button variant="primary" onClick={handleEditClick}>
+              <Button variant="primary" onClick={handleEditClick}>
                 Edit
-                </Button>
-                <Button variant="secondary" onClick={handleClose}>
-                    Close
-                </Button>
+              </Button>
+              <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
             </>
           )}
         </Modal.Footer>

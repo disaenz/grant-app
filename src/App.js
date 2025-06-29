@@ -10,7 +10,7 @@ function App() {
     <div className="container my-5">
       <Row className="mb-4">
         <Col xs={6} md={8}>
-          <h1 className="m-0">Grantmaking Table (Image will go here)</h1>
+          <h1 className="m-0">Grants</h1>
         </Col>
         <Col xs={6} md={4} className="text-end">
           <NewGrant />
