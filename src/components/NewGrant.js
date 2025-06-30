@@ -4,10 +4,24 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
 
+const TYPE_OPTIONS = [
+  "Closed",
+  "Continuation",
+  "Extended",
+  "New",
+  "Renewal",
+];
+
+const STATUS_OPTIONS = [
+  "Active",
+  "Closed",
+  "Pending",
+];
+
 function NewGrant({ onAddAward }) {
   const [showModal, setShowModal] = useState(false);
 
-  const [newAward, setNewAward] = useState({
+  const [newGrant, setNewGrant] = useState({
     name: '',
     program: '',
     type: '',
@@ -22,7 +36,7 @@ function NewGrant({ onAddAward }) {
 
   const handleClose = () => {
     setShowModal(false);
-    setNewAward({
+    setNewGrant({
       name: '',
       program: '',
       type: '',
@@ -35,14 +49,13 @@ function NewGrant({ onAddAward }) {
   };
 
   const handleChange = (field) => (e) => {
-    setNewAward({ ...newAward, [field]: e.target.value });
+    setNewGrant({ ...newGrant, [field]: e.target.value });
   };
 
   const handleDateChange = (field) => (date) => {
-    setNewAward({ ...newAward, [field]: date });
+    setNewGrant({ ...newGrant, [field]: date });
   };
 
-  // Converts a Date object to MM/DD/YYYY string
   const formatDate = (date) => {
     if (!date) return '';
     return format(date, 'MM/dd/yyyy');
@@ -50,12 +63,13 @@ function NewGrant({ onAddAward }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Convert Date objects to MM/DD/YYYY before saving
+    
     const payload = {
-      ...newAward,
-      startDate: formatDate(newAward.startDate),
-      deadline: formatDate(newAward.deadline),
+      ...newGrant,
+      startDate: formatDate(newGrant.startDate),
+      deadline: formatDate(newGrant.deadline),
     };
+    
     onAddAward(payload);
     handleClose();
   };
@@ -79,7 +93,7 @@ function NewGrant({ onAddAward }) {
               <Col md={9}>
                 <Form.Control
                   type="text"
-                  value={newAward.name}
+                  value={newGrant.name}
                   onChange={handleChange('name')}
                   required
                 />
@@ -90,7 +104,7 @@ function NewGrant({ onAddAward }) {
               <Col md={9}>
                 <Form.Control
                   type="text"
-                  value={newAward.program}
+                  value={newGrant.program}
                   onChange={handleChange('program')}
                   required
                 />
@@ -99,34 +113,44 @@ function NewGrant({ onAddAward }) {
             <Row className="mb-3">
               <Col md={3} className="fw-bold">Type</Col>
               <Col md={9}>
-                <Form.Control
-                  type="text"
-                  value={newAward.type}
+                <Form.Select
+                  value={newGrant.type}
                   onChange={handleChange('type')}
                   required
-                />
+                >
+                  <option value="">Select type...</option>
+                  {TYPE_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </Form.Select>
               </Col>
             </Row>
             <Row className="mb-3">
               <Col md={3} className="fw-bold">Status</Col>
               <Col md={9}>
-                <Form.Control
-                  type="text"
-                  value={newAward.status}
+                <Form.Select
+                  value={newGrant.status}
                   onChange={handleChange('status')}
-                />
+                  required
+                >
+                  <option value="">Select status...</option>
+                  {STATUS_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </Form.Select>
               </Col>
             </Row>
             <Row className="mb-3">
               <Col md={3} className="fw-bold">Start Date</Col>
               <Col md={9}>
                 <DatePicker
-                  selected={newAward.startDate}
+                  selected={newGrant.startDate}
                   onChange={handleDateChange('startDate')}
                   dateFormat="MM/dd/yyyy"
                   className="form-control"
                   placeholderText="Select date"
                   required
+                  style={{ width: "100%" }}
                 />
               </Col>
             </Row>
@@ -134,12 +158,13 @@ function NewGrant({ onAddAward }) {
               <Col md={3} className="fw-bold">Deadline</Col>
               <Col md={9}>
                 <DatePicker
-                  selected={newAward.deadline}
+                  selected={newGrant.deadline}
                   onChange={handleDateChange('deadline')}
                   dateFormat="MM/dd/yyyy"
                   className="form-control"
                   placeholderText="Select date"
                   required
+                  style={{ width: "100%" }}
                 />
               </Col>
             </Row>
@@ -148,7 +173,7 @@ function NewGrant({ onAddAward }) {
               <Col md={9}>
                 <Form.Control
                   type="text"
-                  value={newAward.budgetRange}
+                  value={newGrant.budgetRange}
                   onChange={handleChange('budgetRange')}
                 />
               </Col>
@@ -160,7 +185,7 @@ function NewGrant({ onAddAward }) {
                   as="textarea"
                   rows={3}
                   style={{ resize: 'none' }}
-                  value={newAward.notes}
+                  value={newGrant.notes}
                   onChange={handleChange('notes')}
                 />
               </Col>

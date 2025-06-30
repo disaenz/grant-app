@@ -1,36 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import DataRow from './DataRow';
 
 function GrantTable({ data }) {
-  const [grants, setGrants] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // `data` is an array of grants, already fetched by App.js
 
-  useEffect(() => {
-  const fetchGrants = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/grants');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setGrants(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchGrants();
-}, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (!data || !Array.isArray(data)) {
+    return <div>No grant data available.</div>;
+  }
 
   return (
     <div className="table-responsive" style={{ overflowX: 'auto' }}>
-      <table className="table table-bordered table-hover" style={{ minWidth: '1500px'}}>
+      <table className="table table-bordered table-hover" style={{ minWidth: '1500px' }}>
         <thead>
           <tr>
             <th>Name</th>
@@ -44,9 +24,15 @@ function GrantTable({ data }) {
           </tr>
         </thead>
         <tbody>
-          {grants.map((grant, idx) => (
-            <DataRow key={idx} rowData={grant} />
-          ))}
+          {data.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="text-center">No grants found.</td>
+            </tr>
+          ) : (
+            data.map((grant, idx) => (
+              <DataRow key={grant.id || idx} rowData={grant} />
+            ))
+          )}
         </tbody>
       </table>
     </div>
