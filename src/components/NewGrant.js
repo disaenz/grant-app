@@ -74,8 +74,12 @@ function NewGrant({ onAddAward }) {
 
   return (
     <>
-      <div className="d-flex justify-content-end mb-3">
-        <Button className="new-grant-button" variant="success" onClick={handleShow}>
+      <div className="d-flex justify-content-start justify-content-md-end mb-3">
+        <Button
+          className="new-grant-button"
+          variant="success"
+          onClick={handleShow}
+        >
           + New Grant
         </Button>
       </div>

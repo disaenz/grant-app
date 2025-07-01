@@ -64,11 +64,16 @@ function App() {
 
   return (
     <div className="container my-5">
-      <Row className="mb-4">
-        <Col xs={6} md={8}>
-          <h1 className="m-0">Grants</h1>
+      <Row className="mb-4 align-items-center">
+        <Col xs={12} md={8}>
+          <h1 className="display-4 fw-bold mb-0" style={{ letterSpacing: "1px" }}>
+            Grant Dashboard
+          </h1>
+          <p className="text-muted" style={{ fontSize: "1.0rem", marginTop: 8 }}>
+            Manage, track, and review all grants in one place
+          </p>
         </Col>
-        <Col xs={6} md={4} className="text-end">
+        <Col>
           <NewGrant onAddAward={handleNewGrant} />
         </Col>
       </Row>
