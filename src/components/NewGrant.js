@@ -52,13 +52,22 @@ function NewGrant({ onAddAward }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+    const requiredFields = [
+      'name', 'program', 'type', 'status', 'startDate', 'deadline', 'budgetRange'
+    ];
+    for (let field of requiredFields) {
+      if (!newGrant[field] || (typeof newGrant[field] === 'string' && newGrant[field].trim() === '')) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+    }
+
     const payload = {
       ...newGrant,
       startDate: formatDate(newGrant.startDate),
       deadline: formatDate(newGrant.deadline),
     };
-    
+
     onAddAward(payload);
     handleClose();
   };
@@ -78,7 +87,9 @@ function NewGrant({ onAddAward }) {
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Name</Col>
+              <Col md={3} className="fw-bold">
+                Name<span style={{ color: "red" }}>*</span>
+              </Col>
               <Col md={9}>
                 <Form.Control
                   type="text"
@@ -89,7 +100,9 @@ function NewGrant({ onAddAward }) {
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Program</Col>
+              <Col md={3} className="fw-bold">
+                Program<span style={{ color: "red" }}>*</span>
+              </Col>
               <Col md={9}>
                 <Form.Control
                   type="text"
@@ -100,7 +113,9 @@ function NewGrant({ onAddAward }) {
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Type</Col>
+              <Col md={3} className="fw-bold">
+                Type<span style={{ color: "red" }}>*</span>
+              </Col>
               <Col md={9}>
                 <Form.Select
                   value={newGrant.type}
@@ -115,7 +130,9 @@ function NewGrant({ onAddAward }) {
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Status</Col>
+              <Col md={3} className="fw-bold">
+                Status<span style={{ color: "red" }}>*</span>
+              </Col>
               <Col md={9}>
                 <Form.Select
                   value={newGrant.status}
@@ -130,7 +147,9 @@ function NewGrant({ onAddAward }) {
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Start Date</Col>
+              <Col md={3} className="fw-bold">
+                Start Date<span style={{ color: "red" }}>*</span>
+              </Col>
               <Col md={9}>
                 <DatePicker
                   selected={newGrant.startDate}
@@ -144,7 +163,9 @@ function NewGrant({ onAddAward }) {
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Deadline</Col>
+              <Col md={3} className="fw-bold">
+                Deadline<span style={{ color: "red" }}>*</span>
+              </Col>
               <Col md={9}>
                 <DatePicker
                   selected={newGrant.deadline}
@@ -158,17 +179,22 @@ function NewGrant({ onAddAward }) {
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Budget Range</Col>
+              <Col md={3} className="fw-bold">
+                Budget Range<span style={{ color: "red" }}>*</span>
+              </Col>
               <Col md={9}>
                 <Form.Control
                   type="text"
                   value={newGrant.budgetRange}
                   onChange={handleChange('budgetRange')}
+                  required
                 />
               </Col>
             </Row>
             <Row className="mb-3">
-              <Col md={3} className="fw-bold">Notes</Col>
+              <Col md={3} className="fw-bold">
+                Notes
+              </Col>
               <Col md={9}>
                 <Form.Control
                   as="textarea"
@@ -176,6 +202,7 @@ function NewGrant({ onAddAward }) {
                   style={{ resize: 'none' }}
                   value={newGrant.notes}
                   onChange={handleChange('notes')}
+                  placeholder="Optional"
                 />
               </Col>
             </Row>
