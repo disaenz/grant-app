@@ -95,7 +95,7 @@ function DataRow({ rowData, onUpdate }) {
   return (
     <>
       <tr className="clickable-row" onClick={handleShow}>
-        <td>{rowData.name}</td>
+        <td className="blue-column">{rowData.name}</td>
         <td>{rowData.program}</td>
         <td>{rowData.type}</td>
         <td>{rowData.status}</td>

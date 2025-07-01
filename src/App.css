@@ -45,7 +45,7 @@
 .blue-column {
   background-color: #e5f5fb !important;
   color: #333 !important;
-  font-weight: bold; /* Optional */
+  font-weight: bold;
 }
 
 .clickable-row {
