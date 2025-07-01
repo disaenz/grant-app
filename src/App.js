@@ -8,13 +8,14 @@ function App() {
   const [grants, setGrants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API_BASE = process.env.REACT_APP_GRANT_API_URL || 'http://localhost:8000';
 
   // Load grants from API
   const fetchGrants = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:8000/api/grants');
+      const response = await fetch(`${API_BASE}/api/grants`);
       if (!response.ok) throw new Error('Failed to fetch grants');
       const data = await response.json();
       setGrants(Array.isArray(data) ? data : data.grants);
@@ -31,7 +32,7 @@ function App() {
 
   const handleNewGrant = async (payload) => {
     try {
-      const response = await fetch('http://localhost:8000/api/grants', {
+      const response = await fetch(`${API_BASE}/api/grants`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
