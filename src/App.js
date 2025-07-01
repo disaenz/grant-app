@@ -44,6 +44,23 @@ function App() {
     }
   };
 
+  const handleUpdateGrant = async (updatedGrant) => {
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/grants/${updatedGrant.id}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedGrant)
+      }
+    );
+    if (!response.ok) throw new Error('Failed to update grant');
+    await fetchGrants();
+  } catch (err) {
+    alert('Failed to update grant: ' + err.message);
+  }
+};
+
   return (
     <div className="container my-5">
       <Row className="mb-4">
@@ -59,7 +76,7 @@ function App() {
       ) : error ? (
         <div className="text-danger">Error: {error}</div>
       ) : (
-        <GrantTable data={grants} />
+        <GrantTable data={grants} onUpdate={handleUpdateGrant}/>
       )}
     </div>
   );

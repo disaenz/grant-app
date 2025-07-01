@@ -4,19 +4,8 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
 
-const TYPE_OPTIONS = [
-  "Closed",
-  "Continuation",
-  "Extended",
-  "New",
-  "Renewal",
-];
-
-const STATUS_OPTIONS = [
-  "Active",
-  "Closed",
-  "Pending",
-];
+const TYPE_OPTIONS = ["Closed", "Continuation", "Extended", "New", "Renewal"];
+const STATUS_OPTIONS = ["Active", "Closed", "Pending"];
 
 function NewGrant({ onAddAward }) {
   const [showModal, setShowModal] = useState(false);

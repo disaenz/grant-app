@@ -2,69 +2,27 @@ import React, { useState } from 'react';
 import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { parse, isValid } from 'date-fns';
+import { parse, isValid, format } from 'date-fns';
 
-function DataRow({ rowData }) {
+const TYPE_OPTIONS = ["Closed", "Continuation", "Extended", "New", "Renewal"];
+const STATUS_OPTIONS = ["Active", "Closed", "Pending"];
+
+function DataRow({ rowData, onUpdate }) {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tempData, setTempData] = useState({ ...rowData });
   const [shouldShowAlert, setShouldShowAlert] = useState(false);
 
-  const handleShow = () => {
-    setShowModal(true);
-    setIsEditing(false);
-    setTempData({ ...rowData });
-  };
-
-  const handleClose = () => {
-    setShowModal(false);
-    setIsEditing(false);
-  };
-
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveClick = () => {
-    setIsEditing(false);
-    setShouldShowAlert(true);
-    setShowModal(false);
-  };
-
-  const handleCancelClick = () => {
-    setTempData({ ...rowData });
-    setIsEditing(false);
-  };
-
   const parseDate = (dateStr) => {
     if (!dateStr) return null;
-    const parsed = parse(dateStr, "MM/dd/yyyy", new Date());
+    const parsed = parse(dateStr, 'MM/dd/yyyy', new Date());
     return isValid(parsed) ? parsed : null;
   };
 
-  const handleDateChange = (field) => (date) => {
-    setTempData({
-      ...tempData,
-      [field]: date ? 
-        date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) 
-        : ''
-    });
+  const formatDate = (dateObj) => {
+    if (!dateObj) return '';
+    return format(dateObj, 'MM/dd/yyyy');
   };
-
-  // Renders date as text or DatePicker
-  const renderDateField = (fieldName) =>
-    isEditing ? (
-      <DatePicker
-        selected={parseDate(tempData[fieldName])}
-        onChange={handleDateChange(fieldName)}
-        dateFormat="MM/dd/yyyy"
-        className="form-control"
-        placeholderText="Select date"
-        style={{ width: "100%" }}
-      />
-    ) : (
-      <span>{rowData[fieldName]}</span>
-    );
 
   const renderTextField = (fieldName) =>
     isEditing ? (
@@ -97,6 +55,72 @@ function DataRow({ rowData }) {
           : rowData.notes}
       </span>
     );
+
+  const renderDropdownField = (fieldName, options) => {
+    let currentValue = tempData[fieldName] ?? "";
+    const isValidOption = options.includes(currentValue);
+    return isEditing ? (
+      <Form.Select
+        value={isValidOption ? currentValue : ""}
+        onChange={e =>
+          setTempData({ ...tempData, [fieldName]: e.target.value })
+        }
+        required
+      >
+        <option value="">Select {fieldName}...</option>
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </Form.Select>
+    ) : (
+      <span>{rowData[fieldName]}</span>
+    );
+  };
+
+  const renderDateField = (fieldName) => {
+    return isEditing ? (
+      <DatePicker
+        selected={parseDate(tempData[fieldName])}
+        onChange={date =>
+          setTempData({ ...tempData, [fieldName]: formatDate(date) })
+        }
+        dateFormat="MM/dd/yyyy"
+        className="form-control"
+        placeholderText="Select date"
+        required
+        style={{ width: "100%" }}
+      />
+    ) : (
+      <span>{rowData[fieldName]}</span>
+    );
+  };
+
+  const handleShow = () => {
+    setShowModal(true);
+    setIsEditing(false);
+    setTempData({ ...rowData });
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setIsEditing(false);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveClick = () => {
+    onUpdate(tempData);
+    setIsEditing(false);
+    setShouldShowAlert(true);
+    setShowModal(false);
+  };
+
+  const handleCancelClick = () => {
+    setTempData({ ...rowData });
+    setIsEditing(false);
+  };
 
   return (
     <>
@@ -140,11 +164,11 @@ function DataRow({ rowData }) {
           </Row>
           <Row className="mb-3">
             <Col md={4} className="fw-bold">Type</Col>
-            <Col md={8}>{renderTextField('type')}</Col>
+            <Col md={8}>{renderDropdownField('type', TYPE_OPTIONS)}</Col>
           </Row>
           <Row className="mb-3">
             <Col md={4} className="fw-bold">Status</Col>
-            <Col md={8}>{renderTextField('status')}</Col>
+            <Col md={8}>{renderDropdownField('status', STATUS_OPTIONS)}</Col>
           </Row>
           <Row className="mb-3">
             <Col md={4} className="fw-bold">Start Date</Col>

@@ -1,7 +1,7 @@
 import React from 'react';
 import DataRow from './DataRow';
 
-function GrantTable({ data }) {
+function GrantTable({ data, onUpdate }) {
   // `data` is an array of grants, already fetched by App.js
 
   if (!data || !Array.isArray(data)) {
@@ -30,7 +30,7 @@ function GrantTable({ data }) {
             </tr>
           ) : (
             data.map((grant, idx) => (
-              <DataRow key={grant.id || idx} rowData={grant} />
+              <DataRow key={grant.id || idx} rowData={grant} onUpdate={onUpdate}/>
             ))
           )}
         </tbody>
