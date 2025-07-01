@@ -80,3 +80,15 @@
   width: 100%;
 }
 
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  /* Optional: padding for nicer spacing */
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
