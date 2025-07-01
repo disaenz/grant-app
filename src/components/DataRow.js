@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, isValid } from 'date-fns';
 
 function DataRow({ rowData }) {
   const [showModal, setShowModal] = useState(false);
@@ -23,7 +26,6 @@ function DataRow({ rowData }) {
   };
 
   const handleSaveClick = () => {
-    // TODO: Add save logic here (API call if needed)
     setIsEditing(false);
     setShouldShowAlert(true);
     setShowModal(false);
@@ -33,6 +35,36 @@ function DataRow({ rowData }) {
     setTempData({ ...rowData });
     setIsEditing(false);
   };
+
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const parsed = parse(dateStr, "MM/dd/yyyy", new Date());
+    return isValid(parsed) ? parsed : null;
+  };
+
+  const handleDateChange = (field) => (date) => {
+    setTempData({
+      ...tempData,
+      [field]: date ? 
+        date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) 
+        : ''
+    });
+  };
+
+  // Renders date as text or DatePicker
+  const renderDateField = (fieldName) =>
+    isEditing ? (
+      <DatePicker
+        selected={parseDate(tempData[fieldName])}
+        onChange={handleDateChange(fieldName)}
+        dateFormat="MM/dd/yyyy"
+        className="form-control"
+        placeholderText="Select date"
+        style={{ width: "100%" }}
+      />
+    ) : (
+      <span>{rowData[fieldName]}</span>
+    );
 
   const renderTextField = (fieldName) =>
     isEditing ? (
@@ -116,11 +148,11 @@ function DataRow({ rowData }) {
           </Row>
           <Row className="mb-3">
             <Col md={4} className="fw-bold">Start Date</Col>
-            <Col md={8}>{renderTextField('startDate')}</Col>
+            <Col md={8}>{renderDateField('startDate')}</Col>
           </Row>
           <Row className="mb-3">
             <Col md={4} className="fw-bold">Deadline</Col>
-            <Col md={8}>{renderTextField('deadline')}</Col>
+            <Col md={8}>{renderDateField('deadline')}</Col>
           </Row>
           <Row className="mb-3">
             <Col md={4} className="fw-bold">Budget Range</Col>
