@@ -4,14 +4,13 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { parse, isValid, format } from 'date-fns';
 
-const TYPE_OPTIONS = ["Closed", "Continuation", "Extended", "New", "Renewal"];
+const TYPE_OPTIONS = ["Continuation", "Extended", "New", "Renewal"];
 const STATUS_OPTIONS = ["Active", "Closed", "Pending"];
 
 function DataRow({ rowData, onUpdate }) {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tempData, setTempData] = useState({ ...rowData });
-  const [shouldShowAlert, setShouldShowAlert] = useState(false);
 
   const parseDate = (dateStr) => {
     if (!dateStr) return null;
@@ -113,7 +112,6 @@ function DataRow({ rowData, onUpdate }) {
   const handleSaveClick = () => {
     onUpdate(tempData);
     setIsEditing(false);
-    setShouldShowAlert(true);
     setShowModal(false);
   };
 
@@ -142,12 +140,6 @@ function DataRow({ rowData, onUpdate }) {
       <Modal
         show={showModal}
         onHide={handleClose}
-        onExited={() => {
-          if (shouldShowAlert) {
-            alert('Record was successfully updated!');
-            setShouldShowAlert(false);
-          }
-        }}
         size="lg"
       >
         <Modal.Header closeButton>

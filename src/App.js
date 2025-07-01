@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import NewGrant from './components/NewGrant';
 import GrantTable from './components/GrantTable';
 import { Row, Col } from 'react-bootstrap';
+import { Spinner } from 'react-bootstrap';
 import './App.css';
 
 function App() {
@@ -72,7 +73,11 @@ function App() {
         </Col>
       </Row>
       {loading ? (
-        <div>Loading…</div>
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 200 }}>
+          <Spinner animation="border" role="status" variant="primary">
+            <span className="visually-hidden">Loading grants…</span>
+          </Spinner>
+        </div>
       ) : error ? (
         <div className="text-danger">Error: {error}</div>
       ) : (
