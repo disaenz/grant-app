@@ -1,0 +1,97 @@
+name: 🚀 CI/CD Pipeline for Grant App
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: grant-app-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: 🛠 CI (Lint & Build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: 🛡️ Static code analysis (ESLint)
+        run: npm run lint
+
+      - name: Create .env file for build
+        run: |
+          echo "REACT_APP_GRANT_API_URL=${{ secrets.GRANT_API_URL }}" > .env
+          cat .env
+
+      - name: 🔨 Build site
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build/
+
+  cd:
+    name: 🚀 CD (Deploy to S3 + CloudFront)
+    needs: ci
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    env:
+      DOMAIN: "${{secrets.DOMAIN_NAME}}"
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: build/
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      - name: Sync to S3
+        run: |
+          if [ ! -d "build" ] || [ -z "$(ls -A build)" ]; then
+            echo "❌ Build directory build is empty. Aborting."
+            exit 1
+          fi
+          aws s3 sync build/ s3://${{ secrets.BUCKET_NAME }}/ \
+            --delete \
+            --region ${{ secrets.AWS_REGION }} \
+            --cache-control "max-age=0,no-cache,no-store,must-revalidate"
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          echo "🔍 Looking up CloudFront distribution for $DOMAIN…"
+          DISTRIBUTION_ID=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?contains(Aliases.Items, \`${DOMAIN}\`)].Id | [0]" \
+            --output text)
+          if [[ -z "$DISTRIBUTION_ID" || "$DISTRIBUTION_ID" == "None" ]]; then
+            echo "❌ Error: could not find a CloudFront distribution for $DOMAIN" >&2
+            exit 1
+          fi
+          echo "→ Found distribution ID: $DISTRIBUTION_ID"
+          echo "🗑️  Creating CloudFront invalidation…"
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/*" \
+            --region us-east-1
+
+      - name: Success 🎉
+        run: |
+          echo "✅ Deployment complete!"
+          echo "  Your site should be live"

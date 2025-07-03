@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
 import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, isValid, format } from 'date-fns';
 
-function DataRow({ rowData }) {
+const TYPE_OPTIONS = ["Continuation", "Extended", "New", "Renewal"];
+const STATUS_OPTIONS = ["Active", "Closed", "Pending"];
+
+function DataRow({ rowData, onUpdate }) {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tempData, setTempData] = useState({ ...rowData });
-  const [shouldShowAlert, setShouldShowAlert] = useState(false);
+
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const parsed = parse(dateStr, 'MM/dd/yyyy', new Date());
+    return isValid(parsed) ? parsed : null;
+  };
+  
+  const formatDate = (dateObj) => (dateObj ? format(dateObj, 'MM/dd/yyyy') : '');
 
   const handleShow = () => {
     setShowModal(true);
@@ -18,208 +31,191 @@ function DataRow({ rowData }) {
     setIsEditing(false);
   };
 
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveClick = () => {
-    console.log('Saving data:', tempData);
-    setIsEditing(false);
-    setShouldShowAlert(true);
-    setShowModal(false);
-  };
+  const handleEditClick = () => setIsEditing(true);
 
   const handleCancelClick = () => {
     setTempData({ ...rowData });
     setIsEditing(false);
   };
 
-  const renderTextField = (fieldName) => {
-    return isEditing ? (
-      <Form.Control
-        type="text"
-        value={tempData[fieldName] || ''}
-        onChange={(e) =>
-          setTempData({ ...tempData, [fieldName]: e.target.value })
-        }
-      />
-    ) : (
-      <span>{rowData[fieldName]}</span>
+
+  const handleSaveSubmit = (e) => {
+    e.preventDefault();
+    onUpdate(tempData);
+    setIsEditing(false);
+    setShowModal(false);
+  };
+
+
+  const renderTextField = (fieldName, required = false) =>
+    <Form.Control
+      type="text"
+      value={tempData[fieldName] || ''}
+      onChange={e => setTempData({ ...tempData, [fieldName]: e.target.value })}
+      required={required}
+    />;
+
+  const renderDropdownField = (fieldName, options, required = false) => {
+    let currentValue = tempData[fieldName] ?? "";
+    const isValidOption = options.includes(currentValue);
+    return (
+      <Form.Select
+        value={isValidOption ? currentValue : ""}
+        onChange={e => setTempData({ ...tempData, [fieldName]: e.target.value })}
+        required={required}
+      >
+        <option value="">Select {fieldName}...</option>
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </Form.Select>
     );
   };
 
-  const renderNotesField = () => {
-    return isEditing ? (
-      <Form.Control
-        as="textarea"
-        rows={3}
-        style={{ resize: 'none' }}
-        value={tempData.notes || ''}
-        onChange={(e) => setTempData({ ...tempData, notes: e.target.value })}
-      />
-    ) : (
-      <span>{rowData.notes}</span>
-    );
-  };
+  const renderDateField = (fieldName, required = false) =>
+    <DatePicker
+      selected={parseDate(tempData[fieldName])}
+      onChange={date => setTempData({ ...tempData, [fieldName]: formatDate(date) })}
+      dateFormat="MM/dd/yyyy"
+      className="form-control"
+      placeholderText="Select date"
+      required={required}
+      style={{ width: "100%" }}
+    />;
+
+  const renderNotesField = () =>
+    <Form.Control
+      as="textarea"
+      rows={3}
+      style={{ resize: 'none' }}
+      value={tempData.notes || ''}
+      onChange={e => setTempData({ ...tempData, notes: e.target.value })}
+    />;
 
   return (
     <>
       <tr className="clickable-row" onClick={handleShow}>
-        <td className="blue-column">{rowData.grantMakingProcess}</td>
+        <td className="blue-column">{rowData.name}</td>
         <td>{rowData.program}</td>
-        <td>{rowData.competitive}</td>
-        <td>{rowData.typesOfApplication}</td>
-        <td>{rowData.internalOrExternalReview}</td>
-        <td>{rowData.eGrantsOrNewSystem}</td>
-        <td>{rowData.expectedApplicants}</td>
-        <td>{rowData.deadlineForKickOff}</td>
-        <td>{rowData.systemPrepDate}</td>
-        <td>{rowData.outreachStartDate}</td>
-        <td>{rowData.recommendationPlanDate}</td>
-        <td>{rowData.publishDevelopment}</td>
-        <td>{rowData.applicationDueDate}</td>
-        <td>{rowData.reviewPeriod}</td>
-        <td>{rowData.applicantClarification}</td>
-        <td>{rowData.oroClarification}</td>
-        <td>{rowData.programPrepForDecision}</td>
-        <td>{rowData.awardDecision}</td>
-        <td>{rowData.applicantNotification}</td>
-        <td>{rowData.finishTerms}</td>
-        <td>{rowData.oroAwardProcessing}</td>
-        <td>{rowData.budgetOfficeFundCommitment}</td>
-        <td>{rowData.ogaAwardProcessing}</td>
-        <td>{rowData.awardTarget}</td>
+        <td>{rowData.type}</td>
+        <td>{rowData.status}</td>
+        <td>{rowData.startDate}</td>
+        <td>{rowData.deadline}</td>
+        <td>{rowData.budgetRange}</td>
         <td className="notes-col">
-            {rowData.notes && rowData.notes.length > 50
-                ? rowData.notes.slice(0, 50) + "..."
-                : rowData.notes
-            }
+          {rowData.notes && rowData.notes.length > 50
+            ? rowData.notes.slice(0, 50) + "..."
+            : rowData.notes}
         </td>
       </tr>
 
-      <Modal show={showModal} 
-        onHide={() => setShowModal(false)} 
-        onExited={() => {
-          if (shouldShowAlert) {
-            alert('Record was successfully updated!');
-            setShouldShowAlert(false);
-          }
-        }}
-        size="xl">
+      <Modal show={showModal} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>{rowData.grantMakingProcess} Details</Modal.Title>
+          <Modal.Title>{rowData.name} Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Grant Making Process</Col>
-            <Col md={3}>{renderTextField('grantMakingProcess')}</Col>
-            <Col md={3} className="fw-bold">Program</Col>
-            <Col md={3}>{renderTextField('program')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Competitive</Col>
-            <Col md={3}>{renderTextField('competitive')}</Col>
-            <Col md={3} className="fw-bold">Types of Application</Col>
-            <Col md={3}>{renderTextField('typesOfApplication')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Internal or External Review</Col>
-            <Col md={3}>{renderTextField('internalOrExternalReview')}</Col>
-            <Col md={3} className="fw-bold">eGrants or New System</Col>
-            <Col md={3}>{renderTextField('eGrantsOrNewSystem')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Expected Applicants</Col>
-            <Col md={3}>{renderTextField('expectedApplicants')}</Col>
-            <Col md={3} className="fw-bold">Deadline for Kick-Off</Col>
-            <Col md={3}>{renderTextField('deadlineForKickOff')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">System Prep Date</Col>
-            <Col md={3}>{renderTextField('systemPrepDate')}</Col>
-            <Col md={3} className="fw-bold">Outreach Start Date</Col>
-            <Col md={3}>{renderTextField('outreachStartDate')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Recommendation Plan Date</Col>
-            <Col md={3}>{renderTextField('recommendationPlanDate')}</Col>
-            <Col md={3} className="fw-bold">Publish Development</Col>
-            <Col md={3}>{renderTextField('publishDevelopment')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Application Due Date</Col>
-            <Col md={3}>{renderTextField('applicationDueDate')}</Col>
-            <Col md={3} className="fw-bold">Review Period</Col>
-            <Col md={3}>{renderTextField('reviewPeriod')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Applicant Clarification</Col>
-            <Col md={3}>{renderTextField('applicantClarification')}</Col>
-            <Col md={3} className="fw-bold">ORO Clarification</Col>
-            <Col md={3}>{renderTextField('oroClarification')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Program Prep for Decision</Col>
-            <Col md={3}>{renderTextField('programPrepForDecision')}</Col>
-            <Col md={3} className="fw-bold">Award Decision</Col>
-            <Col md={3}>{renderTextField('awardDecision')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Applicant Notification</Col>
-            <Col md={3}>{renderTextField('applicantNotification')}</Col>
-            <Col md={3} className="fw-bold">Finish Terms</Col>
-            <Col md={3}>{renderTextField('finishTerms')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">ORO Award Processing</Col>
-            <Col md={3}>{renderTextField('oroAwardProcessing')}</Col>
-            <Col md={3} className="fw-bold">Budget Office Fund Commitment</Col>
-            <Col md={3}>{renderTextField('budgetOfficeFundCommitment')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">OGA Award Processing</Col>
-            <Col md={3}>{renderTextField('ogaAwardProcessing')}</Col>
-            <Col md={3} className="fw-bold">Award Target</Col>
-            <Col md={3}>{renderTextField('awardTarget')}</Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={3} className="fw-bold">Notes</Col>
-            <Col md={9}>{renderNotesField()}</Col>
-          </Row>
-        </Modal.Body>
-        <Modal.Footer>
           {isEditing ? (
-            <>
-              <Button variant="primary" onClick={handleSaveClick}>
-                Save
-              </Button>
-              <Button variant="secondary" onClick={handleCancelClick}>
-                Cancel
-              </Button>
-            </>
+            <Form onSubmit={handleSaveSubmit}>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">
+                  Name <span style={{ color: "red" }}>*</span>
+                </Col>
+                <Col md={8}>{renderTextField('name', true)}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">
+                  Program <span style={{ color: "red" }}>*</span>
+                </Col>
+                <Col md={8}>{renderTextField('program', true)}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">
+                  Type <span style={{ color: "red" }}>*</span>
+                </Col>
+                <Col md={8}>{renderDropdownField('type', TYPE_OPTIONS, true)}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">
+                  Status <span style={{ color: "red" }}>*</span>
+                </Col>
+                <Col md={8}>{renderDropdownField('status', STATUS_OPTIONS, true)}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">
+                  Start Date <span style={{ color: "red" }}>*</span>
+                </Col>
+                <Col md={8}>{renderDateField('startDate', true)}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">
+                  Deadline <span style={{ color: "red" }}>*</span>
+                </Col>
+                <Col md={8}>{renderDateField('deadline', true)}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">
+                  Budget Range <span style={{ color: "red" }}>*</span>
+                </Col>
+                <Col md={8}>{renderTextField('budgetRange', true)}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Notes</Col>
+                <Col md={8}>{renderNotesField()}</Col>
+              </Row>
+              <div className="text-end">
+                <Button variant="primary" type="submit" className="me-2">
+                  Save
+                </Button>
+                <Button variant="secondary" onClick={handleCancelClick}>
+                  Cancel
+                </Button>
+              </div>
+            </Form>
           ) : (
             <>
-                <Button variant="primary" onClick={handleEditClick}>
-                Edit
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Name</Col>
+                <Col md={8}>{rowData.name}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Program</Col>
+                <Col md={8}>{rowData.program}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Type</Col>
+                <Col md={8}>{rowData.type}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Status</Col>
+                <Col md={8}>{rowData.status}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Start Date</Col>
+                <Col md={8}>{rowData.startDate}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Deadline</Col>
+                <Col md={8}>{rowData.deadline}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Budget Range</Col>
+                <Col md={8}>{rowData.budgetRange}</Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={4} className="fw-bold">Notes</Col>
+                <Col md={8}>{rowData.notes}</Col>
+              </Row>
+              <div className="text-end">
+                <Button variant="primary" onClick={handleEditClick} className="me-2">
+                  Edit
                 </Button>
                 <Button variant="secondary" onClick={handleClose}>
-                    Close
+                  Close
                 </Button>
+              </div>
             </>
           )}
-        </Modal.Footer>
+        </Modal.Body>
       </Modal>
     </>
   );

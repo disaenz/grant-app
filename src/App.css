@@ -45,7 +45,7 @@
 .blue-column {
   background-color: #e5f5fb !important;
   color: #333 !important;
-  font-weight: bold; /* Optional */
+  font-weight: bold;
 }
 
 .clickable-row {
@@ -74,5 +74,21 @@
   background-color: #d9ead3 !important;
   border-color: #d9ead3 !important;
   color: #000 !important; /* Adjust text color if needed */
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  /* Optional: padding for nicer spacing */
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 

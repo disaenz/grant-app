@@ -9,6 +9,10 @@ RUN npm install
 
 # Copy the rest of the app and build for production
 COPY . .
+
+# Add ARG as ENV to container
+ARG REACT_APP_GRANT_API_URL
+ENV REACT_APP_GRANT_API_URL=$REACT_APP_GRANT_API_URL
 RUN npm run build
 
 # Stage 2: Serve the built app using Nginx
