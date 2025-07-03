@@ -5,9 +5,9 @@ permissions:
 
 on:
   push:
-    branches: [ dev ]
-  #pull_request:
-    #branches: [ main ]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
@@ -46,6 +46,7 @@ jobs:
     name: 🚀 CD (Deploy to S3 + CloudFront)
     needs: ci
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     env:
       DOMAIN: "${{secrets.DOMAIN_NAME}}"
     steps:
